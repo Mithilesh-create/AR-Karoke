@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>AR music player</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300,400,600" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="style.css" />
+
+  <link rel="shortcut icon" href="favicon.png" />
+  <!-- include A-Frame obviously -->
+  <script src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+  <!-- include ar.js for A-Frame -->
+  <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
+</head>
+
+<body style='margin : 0px; overflow-x: hidden;'>
+  <script>
+    var _data = '';
+
+    async function setLyric(trackid) {
+      await fetch(`https://spotify-lyric-api.herokuapp.com/?trackid=${trackid}`, {
+        method: 'GET',
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          console.log(result);
+          document.getElementById("vid").play();
+          for (let i = 0; i < result.lines.length; i++) {
+            (function (i) {
+              var timeToStartNote = result.lines[i].startTimeMs;
+              setTimeout(function () {
+                // document.getElementById("wordshere").innerHTML = result.lines[i].words;
+                document.getElementById("wordshere").setAttribute("value", result.lines[i].words)
+
+              }, timeToStartNote);
+            })(i)
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    }
+
+    async function mounted(trackid, name, artist, audio) {
+      document.getElementById("vid").pause();
+      document.getElementById("vid").currentTime = 0;
+
+      document.getElementById("Title").innerHTML = name;
+      document.getElementById("Artist").innerHTML = artist;
+      switch (audio) {
+        case 1:
+          document.getElementById("vidsrc").src = "Rockbye.mp3";
+          break;
+        case 2:
+          document.getElementById("vidsrc").src = "Faded.mp3";
+          break;
+        case 3:
+          document.getElementById("vidsrc").src = "LeanOn.mp3";
+          break;
+        case 4:
+          document.getElementById("vidsrc").src = "NoLie.mp3";
+          break;
+        default:
+          document.getElementById("vidsrc").src = "Rockbye.mp3";
+          break;
+      }
+      await document.getElementById("vid").load();
+
+      await setLyric(trackid);
+    }
+
+
+  </script>
+  <a-scene embedded arjs>
+    <a-marker preset='hiro'>
+      <a-box position='0 0 0' material='color: dodgerblue;opacity: 0.5;' width="3.5" height="2">
+        <!-- <a-entity position="1 0 0" id="wordshere" scale="3 3 3" text="value:Hwllpw ;color:white"></a-entity> -->
+        <a-text id="wordshere" position="-1.5 0 0" value="....(Start Tune)...."></a-text>
+      </a-box>
+    </a-marker>
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <!-- <div id="overlay"></div> -->
+  <div class="play">
+    <div class="over">
+    </div>
+    <div class="musiclabels">
+      <h1>AR Karaoke 🎙️</h1>
+      <div class="selectsong" onclick="mounted(`5knuzwU65gJK7IF5yJsuaW`,(`Rockabye`),`Song by Clean Bandit`,1)">
+        <img src="https://i1.sndcdn.com/artworks-000244229144-izq229-t500x500.jpg" alt="Rockabye" width="100"
+          height="100">
+      </div>
+      <div class="selectsong" onclick="mounted(`698ItKASDavgwZ3WjaWjtz`,(`Faded`),`Song by Alan Walker`,2)">
+        <img src="https://i1.sndcdn.com/artworks-000169103463-rjkta2-t500x500.jpg" alt="Alan Walker" width="100"
+          height="100">
+      </div>
+      <div class="selectsong"
+        onclick="mounted(`1Lim1Py7xBgbAkAys3AGAG`,(`Lean On`),`Song by DJ Snake, Major Lazer, and MØ`,3)">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/en/e/ed/Major_Lazer_and_DJ_Snake_-_Lean_On_%28feat._M%C3%98%29.png"
+          alt="LeanOn" width="100" height="100">
+      </div>
+
+      <div class="selectsong" onclick="mounted(`48QmG1dfvMuYLxMPt7KSRA`,(`No Lie`),`Dua Lipa`,4)">
+        <img src="https://upload.wikimedia.org/wikipedia/en/d/de/Sean_Paul_ft_Dua_Lipa_-_No_lie.jpg" alt="Sean Paul"
+          width="100" height="100">
+      </div>
+    </div>
+    <div class="content">
+      <div class="lyrics">
+        <!-- <h1 id="wordshere">.</h1> -->
+      </div>
+    </div>
+
+  </div>
+
+ 
+  <div class="player">
+    <div class="left"></div>
+    <div class="right">
+      <div class="top">
+        <p class="songs" id="Title">
+          Rockabye
+        </p>
+        <p id="Artist" class="songs">Song by Clean Bandit</p>
+      </div>
+      <div class="bottom">
+        <video controlslist="nodownload" id="vid" controls="" _autoplay="" name="media" oncontextmenu="return false;">
+          <source src="Rockbye.mp3" type="audio/mpeg" id="vidsrc" />
+        </video>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- partial -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</body>
+
+</html>
